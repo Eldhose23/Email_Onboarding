@@ -1,0 +1,6 @@
+# Ignore everything at the repository root
+/*
+
+# Allow the root ignore file and this project
+!/.gitignore
+!/Email_Auto/

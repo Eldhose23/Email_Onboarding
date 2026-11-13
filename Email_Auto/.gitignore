@@ -1,0 +1,10 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.log
+*.docx
+auto_Email_Onboarding_v2.py
+*.json
+getengineerids.py
