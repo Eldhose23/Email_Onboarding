@@ -73,6 +73,12 @@ while True:
         timeout=(10, 120)
     )
 
+    # print("Status Code:", response.status_code)
+    # print("Response:", response.text)
+    # response.raise_for_status()
+
+    task_details = response.json().get("result", {})
+
     response.raise_for_status()
     tasks = response.json().get("result", [])
 
@@ -123,6 +129,7 @@ for task in all_tasks:
         print(f"Skipping {task_number}: no requested employee found")
         continue
     print(f"{task_number}: {user_sys_id}")
+
  # Get employee details
     response = requests.get(
         f"{base_url}/sys_user/{user_sys_id}",
@@ -142,125 +149,67 @@ for task in all_tasks:
     email = user.get("email", {}).get("value", "")
     employee_location = user.get("location", {}).get("display_value", "")
     userid = user.get("user_name", {}).get("value", "")
-    print(userid)
-response = requests.get(
-    f"{base_url}/u_onboarding_changes",
-    params={
-        "sysparm_query": "u_user_profile.user_name=llosada",
-        "sysparm_fields": "sys_id,u_user_profile,u_onboarding_hire_date,sys_updated_on",
-        "sysparm_display_value": "all",
-        "sysparm_limit": 20
-    },
-    headers=headers,
-    auth=(client_id, client_secret),
-    timeout=(10, 120)
-)
+    #print(userid)
 
-print("Status:", response.status_code)
-print(response.text)
+    # user_sys_id = (
+    #     task_details.get("u_task_requested_for", {}).get("value", "")
+    # )
 
+    # Get onboarding date records for this employee
+    response = requests.get(
+        #f"{base_url}/u_onboarding_changes",
+        f"{base_url}/sys_user",
+        params={
+            "sysparm_query": (
+                #f"u_user_profile={user_sys_id}"
+                f"sys_id={user_sys_id}"
+                             ),
+            "sysparm_fields": (
+                "sys_id,u_user_profile,u_onboarding_hire_date,sys_updated_on,user_name"
+            ),
+            "sysparm_display_value": "all",
+            "sysparm_limit": 100
+        },
+        headers=headers,
+        auth=(client_id, client_secret),
+        timeout=(10, 120)
+    )
+  ##############
 
+    #print("HTTP status:", response.status_code)
+    #print("Response body:", response.text)
+    response.raise_for_status()
+    records = response.json().get("result", [])
+    #print(f"Records: {records}")
 
-response = requests.get(
-    f"{base_url}/u_onboarding_changes",
-    params={
-        "sysparm_query": (
-            "sys_updated_onRELATIVEGT@dayofweek@ago@10"
-            "^assigned_to=7efe6fc9db34d1505aa1ef92ca961902"
-        ),
-        "sysparm_fields": (
-            "sys_id,u_user_profile,u_onboarding_hire_date,"
-            "sys_updated_on,assigned_to"
-        ),
-        "sysparm_display_value": "all",
-        "sysparm_limit": 100
-    },
-    headers=headers,
-    auth=(client_id, client_secret),
-    timeout=(10, 120)
-)
+    onboarding_date = ""
 
-print("Status:", response.status_code)
-print(response.text)
+    if records:
+        onboarding_date = records[0].get(
+            "u_onboarding_hire_date", {}        ).get("display_value", "")
 
+    # Save all details together for later calculations and email creation
+    onboarding_record = {
+        "task_number": task_number,
+        "task_sys_id": task_sys_id,
+        "employee_name": employee_name,
+        "email": email,
+        "location": employee_location,
+        "onboarding_date": onboarding_date,
+        "asset": asset,
+        "userid": userid
+    }
 
-#     # Get onboarding date records for this employee
-#     response = requests.get(
-#         f"{base_url}/u_onboarding_changes",
-#         params={
-#             "sysparm_query": (
-#                 f"u_user_profile={user_sys_id}"
-#                 "^ORDERBYDESCsys_updated_on"
-#             ),
-#             "sysparm_fields": (
-#                 "sys_id,u_user_profile,u_onboarding_hire_date,sys_updated_on,user_name"
-#             ),
-#             "sysparm_display_value": "all",
-#             "sysparm_limit": 100
-#         },
-#         headers=headers,
-#         auth=(client_id, client_secret),
-#         timeout=(10, 120)
-#     )
-#   ##############
+    onboarding_details.append(onboarding_record)
 
-#     print("HTTP status:", response.status_code)
-#     print("Response body:", response.text)
-
-
-#   ########
-
-# # response = requests.get(
-# #     f"{base_url}/sys_user",
-# #     params={
-# #         "sysparm_query": "user_name=llosada",
-# #         "sysparm_fields": "sys_id,name,user_name,email",
-# #         "sysparm_display_value": "all",
-# #         "sysparm_limit": 10
-# #     },
-# #     headers=headers,
-# #     auth=(client_id, client_secret),
-# #     timeout=(10, 120)
-# # )
-
-# # print(response.status_code)
-# # print(response.text)
-
-
-
-
-#     response.raise_for_status()
-#     records = response.json().get("result", [])
-
-#     onboarding_date = ""
-
-#     if records:
-#         onboarding_date = records[0].get(
-#             "u_onboarding_hire_date", {}
-#         ).get("display_value", "")
-
-#     # Save all details together for later calculations and email creation
-#     onboarding_record = {
-#         "task_number": task_number,
-#         "task_sys_id": task_sys_id,
-#         "employee_name": employee_name,
-#         "email": email,
-#         "location": employee_location,
-#         "onboarding_date": onboarding_date,
-#         "asset": asset,
-#         "userid": userid
-#     }
-
-#     onboarding_details.append(onboarding_record)
-
-#     print("\n------------------------------")
-#     print("Task:", task_number)
-#     print("Employee:", employee_name)
-#     print("Email:", email)
-#     print("Location:", employee_location)
-#     print("Onboarding Date:", onboarding_date)
-#     print("Asset:", asset)
-#     print("UserID:", userid)
+    print("\n------------------------------")
+    print("Task:", task_number)
+    print("Employee:", employee_name)
+    print("Email:", email)
+    print("Location:", employee_location)
+    print("Onboarding Date:", onboarding_date)
+    print("Asset:", asset)
+    print("UserID:", userid)
 
 
 # from datetime import datetime, date, timedelta
