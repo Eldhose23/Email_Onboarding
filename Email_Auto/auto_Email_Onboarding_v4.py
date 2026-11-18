@@ -1,5 +1,6 @@
 
 from hashlib import new
+from pandas import unique
 import requests
 import json
 import os
@@ -8,7 +9,7 @@ import win32com.client as win32
 from dotenv import load_dotenv
 from pathlib import Path
 load_dotenv(Path(__file__).resolve().parent / ".env")
-
+script_folder = Path(__file__).resolve().parent
 client_id = os.getenv("CLIENT_ID")
 client_secret = os.getenv("CLIENT_SECRET")
 
@@ -259,7 +260,7 @@ for task in all_tasks:
 
     onboarding_details.append(onboarding_record)
 
-    print("\n------------------------------")
+    #print("\n------------------------------")
     # print("Task:", task_number)
     # print("Employee:", employee_name)
     # print("Email:", email)
@@ -303,7 +304,7 @@ for record in onboarding_details:
 
 # Display results
 print("\nEmployees onboarding next Monday:", len(monday_candidates))
-print("monday_candidates:", monday_candidates)
+#print("monday_candidates:", monday_candidates)
 for candidate in monday_candidates:
     print("------------------------------")
     print("Employee:", candidate["employee_name"])
@@ -326,7 +327,8 @@ for candidate in monday_candidates:
             "name": employee_name,
             "location": candidate["location"],
             "email": candidate["email"],
-            "userid": candidate["userid"]
+            "userid": candidate["userid"],
+            "asset": candidate["asset"]
         }
 
 # Convert to a list
@@ -336,290 +338,293 @@ unique_employees_list = list(unique_employees.values())
 # # with open("monday_onboarding_employees.json", "w", encoding="utf-8") as file:
 # #     json.dump(unique_employees_list, file, indent=4, ensure_ascii=False)
 
-# print("Unique employees:", len(unique_employees_list))
+print("Unique employees:", len(unique_employees_list))
 # print(json.dumps(unique_employees_list, indent=4, ensure_ascii=False))
 
 # #  code to send email to the employee with all the details we have gathered from the above API calls
 
-# print("\n--------------###########----------------------")
+print("\n--------------###########----------------------")
 
 
 # # Image paths
-# image_path = r"C:\Users\eldhoser\python-learning\OnboardingEmail_Automation\nvidia-ss1.png"
-# image_qrIOS = r"C:\Users\eldhoser\python-learning\OnboardingEmail_Automation\qr-ios.png"
-# image_qrAndroid = r"C:\Users\eldhoser\python-learning\OnboardingEmail_Automation\QR-android.png"
-
-# # Start Outlook once, outside the loop
-# outlook = win32.Dispatch("Outlook.Application")
-
-# for unique_employee in unique_employees_list:
-
-#     # Employee details
-#     newjoinername = unique_employee["name"]
-#     newjoinerfirstname = newjoinername.split()[0]
-#     newjoineremail = unique_employee["email"]
-#     newjoineruserid = unique_employee["userid"]
-#     newjoinerlocation = unique_employee["location"]
-#     mail = outlook.CreateItem(0)
-#     emailTo = newjoineremail
-#     mailsubject = f"Welcome to NVIDIA {newjoinerfirstname}!"
-
-#     # Complete HTML email body
-#     mailbody = f"""
-#     <html>
-#     <body style="font-family: Calibri, sans-serif; font-size: 11pt; color: #333333;">
+image_path = script_folder / "nvidia-ss1.png"
+image_qrIOS = script_folder / "qr-ios.png"
+image_qrAndroid = script_folder / "QR-android.png"
 
 
 
-#     <h3 style="color: #000000;">
-#     Welcome to NVIDIA {newjoinerfirstname}!
-#     </h3>
+# Start Outlook once, outside the loop
+outlook = win32.Dispatch("Outlook.Application")
 
-#     <p>
-#     Below are the details to help you get set up with your laptop today.
-#     </p>
+for unique_employee in unique_employees_list:
 
-#     <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
-#      Your Account Details
-#     </h3>
+    # Employee details
+    newjoinername = unique_employee["name"]
+    newjoinerfirstname = newjoinername.split()[0]
+    newjoineremail = unique_employee["email"]
+    newjoineruserid = unique_employee["userid"]
+    newjoinerlocation = unique_employee["location"]
+    mail = outlook.CreateItem(0)
+    emailTo = newjoineremail
+    mailsubject = f"Welcome to NVIDIA {newjoinerfirstname}!"
+   
 
-#     <table style="border-collapse: collapse; width: 600px;">
-#      <tr>
-#          <td style="font-weight: bold; padding: 8px;">
-#              Display Name:
-#          </td>
-#          <td style="padding: 8px;">
-#              {newjoinername}
-#          </td>
-#      </tr>
+    # Complete HTML email body
+    mailbody = f"""
+    <html>
+    <body style="font-family: Calibri, sans-serif; font-size: 11pt; color: #333333;">
 
-#      <tr>
-#          <td style="font-weight: bold; padding: 8px;">
-#              Username:
-#          </td>
-#          <td style="padding: 8px;">
-#              {newjoineruserid}
-#          </td>
-#      </tr>
 
-#      <tr>
-#          <td style="font-weight: bold; padding: 8px;">
-#              Email / Username:
-#          </td>
-#          <td style="padding: 8px;">
-#              {newjoineremail}
-#          </td>
-#      </tr>
-#  </table>
-#  <br>
 
-#  <p style="color: red; font-weight: bold;">
-#      No password is needed. You will create one.
-#  </p>
+    <h3 style="color: #000000;">
+    Welcome to NVIDIA {newjoinerfirstname}!
+    </h3>
 
-#  <br>
+    <p>
+    Below are the details to help you get set up with your laptop today.
+    </p>
 
-#     <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
-#      Windows Deployment
-#     </h3>
+    <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
+     Your Account Details
+    </h3>
 
-#  <p>
-#      Deployment of NVIDIA computers is an automated process. To initiate:
-#  </p>
+    <table style="border-collapse: collapse; width: 600px;">
+     <tr>
+         <td style="font-weight: bold; padding: 8px;">
+             Display Name:
+         </td>
+         <td style="padding: 8px;">
+             {newjoinername}
+         </td>
+     </tr>
 
-#  <ol>
-#      <li>Unbox the system and connect it to power.</li>
-#      <li>Power on the machine and it will load to the Windows setup screen.</li>
-#      <li>Follow the on-screen prompts to select your region and keyboard layout.</li>
-#      <li>Join the system to your Wi-Fi or connect using an Ethernet cable.</li>
-#      <li>
-#          Once the system is connected, you will be prompted to enter your
-#          setup email address. Enter your NVIDIA email address to continue.
+     <tr>
+         <td style="font-weight: bold; padding: 8px;">
+             Username:
+         </td>
+         <td style="padding: 8px;">
+             {newjoineruserid}
+         </td>
+     </tr>
+
+     <tr>
+         <td style="font-weight: bold; padding: 8px;">
+             Email / Username:
+         </td>
+         <td style="padding: 8px;">
+             {newjoineremail}
+         </td>
+     </tr>
+ </table>
+ <br>
+
+ <p style="color: red; font-weight: bold;">
+     No password is needed. You will create one.
+ </p>
+
+ <br>
+
+    <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
+     Windows Deployment
+    </h3>
+
+ <p>
+     Deployment of NVIDIA computers is an automated process. To initiate:
+ </p>
+
+ <ol>
+     <li>Unbox the system and connect it to power.</li>
+     <li>Power on the machine and it will load to the Windows setup screen.</li>
+     <li>Follow the on-screen prompts to select your region and keyboard layout.</li>
+     <li>Join the system to your Wi-Fi or connect using an Ethernet cable.</li>
+     <li>
+         Once the system is connected, you will be prompted to enter your
+         setup email address. Enter your NVIDIA email address to continue.
     
-#          <br>
-#  <img src="cid:nvidia_logo" width="180" style="display: block;">
-#  <br>
-#  <li>Click <span style="font-weight: bold; color: #00cc00;">Forgot Password</span>when prompted to enter password.</li>
-#  <li>When prompted - Enter code from Phone or Alternate Email , this is time-sensitive.</li>
-#  <li>Follow prompts to create your first password</li>
-#  <li>Complete the 2FA verification using MS Authenticator</li>
-#  <li>Continue following all Windows configuration prompts</li>
-#  <li>Set a “Windows Hello for Business” PIN or Face Scan.</li>
-#  </li>
-#  </ol>
-#  <p>
-#  The setup takes up to 1 hour to complete but requires no further input. Once completed you will be presented with the Windows Logon screen at which point you can log in with your Nvidia credentials.
-#  </p>
+         <br>
+ <img src="cid:nvidia_logo" width="180" style="display: block;">
+ <br>
+ <li>Click <span style="font-weight: bold; color: #00cc00;">Forgot Password</span>when prompted to enter password.</li>
+ <li>When prompted - Enter code from Phone or Alternate Email , this is time-sensitive.</li>
+ <li>Follow prompts to create your first password</li>
+ <li>Complete the 2FA verification using MS Authenticator</li>
+ <li>Continue following all Windows configuration prompts</li>
+ <li>Set a “Windows Hello for Business” PIN or Face Scan.</li>
+ </li>
+ </ol>
+ <p>
+ The setup takes up to 1 hour to complete but requires no further input. Once completed you will be presented with the Windows Logon screen at which point you can log in with your Nvidia credentials.
+ </p>
 
 
-#  <h3 style="color: #00cc00; font-weight: bold;">
-#  Critical Updates Required!
-#  </h3>
-#   <P> As with all new technologies, updates are available regularly, for the best experience this process is critical: </p>
-#   <ol>
-#  <li>Start Menu \ Windows Updates : reboots may be required </li>
-#  <li>SupportAssist or Dell Command Update app – reboots may be required </li>
-#   </ol>
-#   <p> Use the <span style="font-weight: bold; color: #00cc00;">Company Portal app</span> to install additional software apps and updates </p>
+ <h3 style="color: #00cc00; font-weight: bold;">
+ Critical Updates Required!
+ </h3>
+  <P> As with all new technologies, updates are available regularly, for the best experience this process is critical: </p>
+  <ol>
+ <li>Start Menu \ Windows Updates : reboots may be required </li>
+ <li>SupportAssist or Dell Command Update app – reboots may be required </li>
+  </ol>
+  <p> Use the <span style="font-weight: bold; color: #00cc00;">Company Portal app</span> to install additional software apps and updates </p>
 
-#  <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
-#     Setup Bitlocker PIN:
-#  </h3>
-#  <ol>
-#  <li> Start menu \ type <span style="font-weight: bold; color: #00cc00;">“Manage BitLocker” </span> and open the app </li>
-#  <li>Turn on BitLocker and follow the prompts to create your BitLocker PIN</li>
-#  </ol>
-#  <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
-#    Security: Set up MS Authenticator, YubiKey and Mobile PassKey:
-#  </h3>
+ <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
+    Setup Bitlocker PIN:
+ </h3>
+ <ol>
+ <li> Start menu \ type <span style="font-weight: bold; color: #00cc00;">“Manage BitLocker” </span> and open the app </li>
+ <li>Turn on BitLocker and follow the prompts to create your BitLocker PIN</li>
+ </ol>
+ <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
+   Security: Set up MS Authenticator, YubiKey and Mobile PassKey:
+ </h3>
 
-#   <p>Nvidia uses 2FA and <a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank">FIDO2 Authentication</a>.  FIDO2 authentication includes Windows Hello for Business (Windows), Touch ID (Mac), YubiKeys (Linux \ MultiOS) and Mobile Passkeys) - <span style="font-weight: bold; color: #00cc00;">Register within 24 hours to avoid losing access! </span> </p>
-#  <ol>
-#  <li>Install and set up the <span style="font-weight: bold; color: #00cc00;"> MS Authenticator app: </span></li>
-#  <table style="width: 100%; border-collapse: collapse;">
-#      <tr>
-#          <!-- iOS -->
-#          <td style="width: 50%; vertical-align: top; padding-right: 20px;">
+  <p>Nvidia uses 2FA and <a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank">FIDO2 Authentication</a>.  FIDO2 authentication includes Windows Hello for Business (Windows), Touch ID (Mac), YubiKeys (Linux \ MultiOS) and Mobile Passkeys) - <span style="font-weight: bold; color: #00cc00;">Register within 24 hours to avoid losing access! </span> </p>
+ <ol>
+ <li>Install and set up the <span style="font-weight: bold; color: #00cc00;"> MS Authenticator app: </span></li>
+ <table style="width: 100%; border-collapse: collapse;">
+     <tr>
+         <!-- iOS -->
+         <td style="width: 50%; vertical-align: top; padding-right: 20px;">
 
-#              <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
-#                  <a href="https://apps.apple.com/gb/app/microsoft-authenticator/id983156458" target="_blank">iOS Version:</a>
-#              </h3>
+             <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
+                 <a href="https://apps.apple.com/gb/app/microsoft-authenticator/id983156458" target="_blank">iOS Version:</a>
+             </h3>
 
-#              <img src="cid:qr_ios" width="180" style="display: block;">
+             <img src="cid:qr_ios" width="180" style="display: block;">
 
-#          </td>
+         </td>
 
-#          <!-- Android -->
-#          <td style="width: 50%; vertical-align: top; padding-left: 20px;">
+         <!-- Android -->
+         <td style="width: 50%; vertical-align: top; padding-left: 20px;">
 
-#              <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
-#                  <a href="https://play.google.com/store/apps/details?id=com.microsoft.authenticator" target="_blank">Android Version:</a>
-#              </h3>
+             <h3 style="color: #5c85d6; font-weight: bold; text-decoration: underline;">
+                 <a href="https://play.google.com/store/apps/details?id=com.microsoft.authenticator" target="_blank">Android Version:</a>
+             </h3>
 
-#              <img src="cid:qr_android" width="180" style="display: block;">
+             <img src="cid:qr_android" width="180" style="display: block;">
 
-#          </td>
-#      </tr>
-#  </table>
+         </td>
+     </tr>
+ </table>
 
-#  <li>Sign in with your NVIDIA email / password and authenticate using any listed method </li>
-#  <li> Follow prompts to install and configure MS Authenticator on your mobile </li>
-#  </ol>
+ <li>Sign in with your NVIDIA email / password and authenticate using any listed method </li>
+ <li> Follow prompts to install and configure MS Authenticator on your mobile </li>
+ </ol>
 
-#  <p>To set up a YubiKey (if applicable), see <a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank">YubiKey Setup and Troubleshooting FAQ</a></p>
-#  <p>Configure your Mobile Passkey Authentication - Passkey allows authentication to NVIDIA resources without entering a password</p>
+ <p>To set up a YubiKey (if applicable), see <a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank">YubiKey Setup and Troubleshooting FAQ</a></p>
+ <p>Configure your Mobile Passkey Authentication - Passkey allows authentication to NVIDIA resources without entering a password</p>
 
-#  <p style="color: red; font-weight: bold;">
-#      Note: Mobile Authentication requires iOS 17 or Android 15
-#  </p>
+ <p style="color: red; font-weight: bold;">
+     Note: Mobile Authentication requires iOS 17 or Android 15
+ </p>
 
-#  <ol>
-#  <li>Launch the Authenticator app on your phone</li>
-#  <li>Tap on your NVIDIA email account</li>
-#  <li>Next, Tap on Create Passkey</li>
-#  <li>Follow the prompts on screen and complete your PassKey setup</li>
-#  <li>Congratulations! Your Passkey setup is now complete and can be used for authentication</li>
-#   </ol>
-#  <p>
-#  For more details on FIDO authentication, see <a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank">Knowledge - FIDO2 Authentication</a>
-#  <br>
-#  Get Help – NvidiaHelp:
-#  <br>
-#  Any IT problems or service requests should be logged via the NvidiaHelp system:
+ <ol>
+ <li>Launch the Authenticator app on your phone</li>
+ <li>Tap on your NVIDIA email account</li>
+ <li>Next, Tap on Create Passkey</li>
+ <li>Follow the prompts on screen and complete your PassKey setup</li>
+ <li>Congratulations! Your Passkey setup is now complete and can be used for authentication</li>
+  </ol>
+ <p>
+ For more details on FIDO authentication, see <a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank">Knowledge - FIDO2 Authentication</a>
+ <br>
+ Get Help – NvidiaHelp:
+ <br>
+ Any IT problems or service requests should be logged via the NvidiaHelp system:
 
-#  <ol>
-#  <li>Online portal \ Chat \ Knowledgebase:<a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank"> NVIDIA Help</a></li>
-#  <li>Email: NVIDIAHelp@nvidia.com</li>
-#  <li>Tel: +49 2405 478001 (Germany)</li>
-#  </ol>
+ <ol>
+ <li>Online portal \ Chat \ Knowledgebase:<a href="https://nvidia.service-now.com/aiux/employeeworks/knowledge/KB0021050" target="_blank"> NVIDIA Help</a></li>
+ <li>Email: NVIDIAHelp@nvidia.com</li>
+ <li>Tel: +49 2405 478001 (Germany)</li>
+ </ol>
 
-#  </p>
-#  </body>
-#  </html>
-#  """
+ </p>
+ </body>
+ </html>
+ """
 
-#     # -----------------------------
-#     # Create Outlook email
-#     # -----------------------------
+    # -----------------------------
+    # Create Outlook email
+    # -----------------------------
 
-#     outlook = win32.Dispatch("Outlook.Application")
-#     email = outlook.CreateItem(0)
-#     email.To = emailTo
-#     email.Subject = mailsubject
-#     email.HTMLBody = mailbody
+    outlook = win32.Dispatch("Outlook.Application")
+    email = outlook.CreateItem(0)
+    email.To = emailTo
+    email.Subject = mailsubject
+    email.HTMLBody = mailbody
 
-#     # -----------------------------
-#     # Add NVIDIA logo
-#     # -----------------------------
+    # -----------------------------
+    # Add NVIDIA logo
+    # -----------------------------
 
-#     attachment = email.Attachments.Add(
-#     image_path,
-#     1,                  # olByValue
-#     0,                  # Position
-#     "nvidia_logo.png"
-#     )
+    attachment = email.Attachments.Add(
+    str(image_path),
+    1,                  # olByValue
+    0,                  # Position
+    "nvidia_logo.png"
+    )
 
-#     attachment.PropertyAccessor.SetProperty(
-#     "http://schemas.microsoft.com/mapi/proptag/0x370E001E",
-#     "image/png"
-#     )
+    attachment.PropertyAccessor.SetProperty(
+    "http://schemas.microsoft.com/mapi/proptag/0x370E001E",
+    "image/png"
+    )
 
-#     attachment.PropertyAccessor.SetProperty(
-#     "http://schemas.microsoft.com/mapi/proptag/0x3712001F",
-#     "nvidia_logo"
-#     )
-
-
-#     # -----------------------------
-#     # Add iOS image
-#     # -----------------------------
-
-#     ios_attachment = email.Attachments.Add(
-#     image_qrIOS,
-#     1,                  # olByValue
-#     0,
-#     "qr_ios.png"
-#     )
-
-#     ios_attachment.PropertyAccessor.SetProperty(
-#     "http://schemas.microsoft.com/mapi/proptag/0x370E001E",
-#     "image/png"
-#     )
-
-#     ios_attachment.PropertyAccessor.SetProperty(
-#     "http://schemas.microsoft.com/mapi/proptag/0x3712001F",
-#     "qr_ios"
-#     )
+    attachment.PropertyAccessor.SetProperty(
+    "http://schemas.microsoft.com/mapi/proptag/0x3712001F",
+    "nvidia_logo"
+    )
 
 
-#     # -----------------------------
-#     # Add Android image
-#     # -----------------------------
+    # -----------------------------
+    # Add iOS image
+    # -----------------------------
 
-#     android_attachment = email.Attachments.Add(
-#     image_qrAndroid,
-#     1,
-#     0,
-#     "qr_android.png"
-#     )
+    ios_attachment = email.Attachments.Add(
+    str(image_qrIOS),
+    1,                  # olByValue
+    0,
+    "qr_ios.png"
+    )
 
-#     android_attachment.PropertyAccessor.SetProperty(
-#     "http://schemas.microsoft.com/mapi/proptag/0x370E001E",
-#     "image/png"
-#     )
+    ios_attachment.PropertyAccessor.SetProperty(
+    "http://schemas.microsoft.com/mapi/proptag/0x370E001E",
+    "image/png"
+    )
 
-#     android_attachment.PropertyAccessor.SetProperty(
-#     "http://schemas.microsoft.com/mapi/proptag/0x3712001F",
-#     "qr_android"
-#     )
+    ios_attachment.PropertyAccessor.SetProperty(
+    "http://schemas.microsoft.com/mapi/proptag/0x3712001F",
+    "qr_ios"
+    )
 
 
-#     # -----------------------------
-#     # Set HTML body
-#     # -----------------------------
-#     email.HTMLBody = mailbody
+    # -----------------------------
+    # Add Android image
+    # -----------------------------
 
-#     # Display each email as a draft for review
-#     email.Display()
+    android_attachment = email.Attachments.Add(
+    str(image_qrAndroid),
+    1,
+    0,
+    "qr_android.png"
+    )
 
-#     print(f"Draft created for {newjoinername}: {newjoineremail}")
+    android_attachment.PropertyAccessor.SetProperty(
+    "http://schemas.microsoft.com/mapi/proptag/0x370E001E",
+    "image/png"
+    )
+
+    android_attachment.PropertyAccessor.SetProperty(
+    "http://schemas.microsoft.com/mapi/proptag/0x3712001F",
+    "qr_android"
+    )
+
+
+    # -----------------------------
+    # Set HTML body
+    # -----------------------------
+    email.HTMLBody = mailbody
+
+    # Display each email as a draft for review
+    email.Display()
+
+    print(f"Draft created for {newjoinername}: {newjoineremail}")
