@@ -8,3 +8,5 @@ __pycache__/
 auto_Email_Onboarding_v2.py
 *.json
 getengineerids.py
+*.png
+*.docx
